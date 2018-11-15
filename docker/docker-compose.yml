@@ -1,0 +1,64 @@
+version: "3.7"
+
+services:
+    redis-master:
+        image: 'redis:3.0-alpine'
+
+    redis-sentinel:
+        image: 'jvstein/redis-sentinel:latest'
+        depends_on:
+            - redis-master
+        links:
+            - redis-master
+
+    postgres:
+        image: 'postgres:9.6-alpine'
+        environment:
+            - POSTGRES_USER=${PG_USR}
+            - POSTGRES_PASSWORD=${PG_PWD}
+        volumes:
+            - postgresdata:/var/lib/postgresql/data
+
+    # initializes the database
+    db-init:
+        image: 'pybossa:latest'
+        depends_on:
+            - postgres
+        environment:
+            - POSTGRES_URL=postgresql://${PG_USR}:${PG_PWD}@db/${PG_USR}
+        links:
+            - postgres:db
+        command: sh -c "sleep 5 && python cli.py db_create"
+
+    # TODO: create a separate scheduler process??
+    #       command: rqscheduler --host redis-master
+    # background worker process
+    pybossa-bgworker:
+        image: 'pybossa:latest'
+        depends_on:
+            - db-init
+        environment:
+            - POSTGRES_URL=postgresql://${PG_USR}:${PG_PWD}@db/${PG_USR}
+        links:
+            - redis-master
+            - redis-sentinel
+            - postgres:db
+        command: python app_context_rqworker.py scheduled_jobs super high medium low email maintenance
+
+    # web server
+    pybossa:
+        image: 'pybossa:latest'
+        container_name: pybossa
+        depends_on:
+            - db-init
+        environment:
+            - POSTGRES_URL=postgresql://${PG_USR}:${PG_PWD}@db/${PG_USR}
+        links:
+            - redis-master
+            - redis-sentinel
+            - postgres:db
+        ports:
+            - "8082:5000"
+
+volumes:
+    postgresdata:
