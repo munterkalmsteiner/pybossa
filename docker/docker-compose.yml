@@ -3,6 +3,8 @@ version: "3"
 services:
     redis-master:
         image: 'redis:3.0-alpine'
+        ports:
+          - "6379:6379"
 
     redis-sentinel:
         image: 'jvstein/redis-sentinel:latest'
@@ -30,8 +32,6 @@ services:
             - postgres:db
         command: sh -c "sleep 5 && python cli.py db_create"
 
-    # TODO: create a separate scheduler process??
-    #       command: rqscheduler --host redis-master
     # background worker process
     pybossa-bgworker:
         image: 'pybossa:latest'
@@ -44,6 +44,17 @@ services:
             - redis-sentinel
             - postgres:db
         command: python app_context_rqworker.py scheduled_jobs super high medium low email maintenance
+
+    # scheduler
+    pybossa-scheduler:
+        image: 'pybossa:latest'
+        depends_on:
+            - pybossa-bgworker
+        environment:
+            - POSTGRES_URL=postgresql://${PG_USR}:${PG_PWD}@db/${PG_USR}
+        links:
+            - redis-master
+        command: rqscheduler --host redis-master
 
     # web server
     pybossa:
