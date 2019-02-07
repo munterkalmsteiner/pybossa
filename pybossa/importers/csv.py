@@ -152,16 +152,20 @@ class BulkTaskLocalCSVImport(BulkTaskCSVImport):
 
         retry = 0
         csv_file = None
+        lasterror = None
         while retry < 10:
             try:
                 csv_file = FileStorage(io.open(csv_filename, encoding='utf-8-sig'))
+                print "{0}".format(csv_filename)
                 break
-            except IOError, e:
+            except IOError as e:
+                print "I/O Error({0}): {1}".format(e.errno, e.strerror)
+                lasterror = e
                 time.sleep(2)
                 retry += 1
 
         if csv_file is None or csv_file.stream is None:
-            msg = ("Unable to load csv file for import, file {0}".format(csv_filename))
+            msg = ("Unable to load csv file for import, file {0}. Reason: {1}".format(csv_filename, lasterror.strerror))
             raise BulkImportException(gettext(msg), 'error')
 
         csv_file.stream.seek(0)
