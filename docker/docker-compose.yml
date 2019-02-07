@@ -44,6 +44,8 @@ services:
             - redis-sentinel
             - postgres:db
         command: python app_context_rqworker.py scheduled_jobs super high medium low email maintenance
+        volumes:
+            - pybossauploads:/opt/pybossa/uploads
 
     # scheduler
     pybossa-scheduler:
@@ -70,6 +72,10 @@ services:
             - postgres:db
         ports:
             - "8082:5000"
+        volumes:
+            - pybossauploads:/opt/pybossa/uploads
+
 
 volumes:
     postgresdata:
+    pybossauploads:
