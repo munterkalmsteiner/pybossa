@@ -40,15 +40,15 @@ SQLALCHEMY_DATABASE_URI = 'postgresql://pybossa:tester@localhost/pybossa'
 ITSDANGEROUSKEY = 'its-dangerous-key'
 
 ## project configuration
-BRAND = 'PyBossa'
-TITLE = 'PyBossa'
-LOGO = 'default_logo.svg'
-COPYRIGHT = 'Set Your Institution'
+BRAND = 'Trafikverket'
+TITLE = 'CoClass Synonymer'
+LOGO = 'coclass_w.svg'
+COPYRIGHT = 'Blekinge Tekniska Högskola'
 DESCRIPTION = 'Set the description in your config'
 TERMSOFUSE = 'http://okfn.org/terms-of-use/'
 DATAUSE = 'http://opendatacommons.org/licenses/by/'
-CONTACT_EMAIL = 'info@pybossa.com'
-CONTACT_TWITTER = 'PyBossa'
+CONTACT_EMAIL = 'mun@bth.se'
+#CONTACT_TWITTER = 'PyBossa'
 
 ## Default number of projects per page
 ## APPS_PER_PAGE = 20
@@ -147,6 +147,9 @@ ACCOUNT_LINK_EXPIRATION = 5 * 60 * 60
 ## Ratelimit configuration
 # LIMIT = 300
 # PER = 15 * 60
+
+# Background job timeout (default is 10 minutes)
+TIMEOUT = 5 * 60 * 60 #5 hours
 
 # Disable new account confirmation (via email)
 ACCOUNT_CONFIRMATION_DISABLED = True
