@@ -36,6 +36,7 @@ def home():
     """Render home page with the cached projects and users."""
     page = 1
     per_page = current_app.config.get('APPS_PER_PAGE', 5)
+    user_id = None
 
     # Add featured
     tmp_projects = cached_projects.get_featured('featured', page, per_page)
@@ -49,6 +50,12 @@ def home():
         user_id = current_user.id
         historical_projects = cached_users.projects_contributed(user_id, order_by='last_contribution')[:3]
         data['historical_contributions'] = historical_projects
+
+    leaderboard_size = current_app.config['LEADERBOARD']
+    top_users = cached_users.get_leaderboard(leaderboard_size)
+    data['top_users'] = top_users
+    data['leaderboard_size'] = leaderboard_size
+
     response = dict(template='/home/index.html', **data)
     return handle_content_type(response)
 
